@@ -15,6 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingController {
 
+    private static final String HEADERNAME = "X-Sharer-User-Id";
+
     private final BookingService bookingService;
 
     @GetMapping("/{itemId}")
@@ -23,14 +25,14 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingReadDto saveBooking(@RequestHeader("X-Sharer-User-Id") Integer userId,
+    public BookingReadDto saveBooking(@RequestHeader(HEADERNAME) Integer userId,
                                       @RequestBody BookingWriteDto bookingWriteDto) {
         return bookingService.saveBooking(bookingWriteDto, userId);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingReadDto updateBooking(@PathVariable("bookingId") Integer bookingId,
-                                        @RequestHeader("X-Sharer-User-Id") Integer userId,
+                                        @RequestHeader(HEADERNAME) Integer userId,
                                         @RequestBody BookingWriteDto bookingWriteDto) {
         return bookingService.updateBooking(bookingWriteDto, bookingId, userId);
     }

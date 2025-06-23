@@ -17,7 +17,6 @@ import ru.practicum.shareit.user.model.User;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserDtoMapper userDtoMapper;
 
     @Override
     public UserReadDto getUserById(Integer id) {
@@ -25,22 +24,22 @@ public class UserServiceImpl implements UserService {
             log.info("Пользователя с id = {} нет", id);
             throw new NotFoundException("Пользователя с таким id нет");
         }
-        return userDtoMapper.userToUserReadDto(userRepository.getUserById(id));
+        return UserDtoMapper.userToUserReadDto(userRepository.getUserById(id));
     }
 
     @Override
     public UserReadDto saveUser(UserWriteDto userWriteDto) {
-        User user = userDtoMapper.userWriteDtoToUser(userWriteDto);
+        User user = UserDtoMapper.userWriteDtoToUser(userWriteDto);
         if (userRepository.checkEmailCrosses(user)) {
             log.info("Пользователь с таким email уже есть");
             throw new ValidationException("Пользователь с таким email уже есть");
         }
-        return userDtoMapper.userToUserReadDto(userRepository.saveUser(user));
+        return UserDtoMapper.userToUserReadDto(userRepository.saveUser(user));
     }
 
     @Override
     public UserReadDto updateUser(UserWriteDto userWriteDto, Integer id) {
-        User user = userDtoMapper.userWriteDtoToUser(userWriteDto);
+        User user = UserDtoMapper.userWriteDtoToUser(userWriteDto);
         if (!userRepository.checkUser(id)) {
             log.info("Пользователя с id = {} нет", id);
             throw new NotFoundException("Пользователя с таким id нет");
@@ -48,7 +47,7 @@ public class UserServiceImpl implements UserService {
             log.info("Пользователь с таким email уже есть");
             throw new ValidationException("Пользователь с таким email уже есть");
         }
-        return userDtoMapper.userToUserReadDto(userRepository.updateUser(user, id));
+        return UserDtoMapper.userToUserReadDto(userRepository.updateUser(user, id));
     }
 
     @Override

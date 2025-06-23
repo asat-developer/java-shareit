@@ -11,9 +11,10 @@ import ru.practicum.shareit.item.dto.ItemWriteDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final ItemDtoMapper itemDtoMapper;
     private final UserRepository userRepository;
 
     @Override
@@ -30,7 +30,7 @@ public class ItemServiceImpl implements ItemService {
             log.info("Предмета с id = {} нет", id);
             throw new NotFoundException("Предмета с таким id нет");
         }
-        return itemDtoMapper.itemToItemReadDto(itemRepository.getItemById(id));
+        return ItemDtoMapper.itemToItemReadDto(itemRepository.getItemById(id));
     }
 
     @Override
@@ -38,8 +38,8 @@ public class ItemServiceImpl implements ItemService {
         if (!userRepository.checkUser(userId)) {
             throw new NotFoundException("Такого пользователя не существует");
         }
-        Item item = itemDtoMapper.itemWriteDtoToItem(itemWriteDto, userId);
-        return itemDtoMapper.itemToItemReadDto(itemRepository.saveItem(item));
+        Item item = ItemDtoMapper.itemWriteDtoToItem(itemWriteDto, userId);
+        return ItemDtoMapper.itemToItemReadDto(itemRepository.saveItem(item));
     }
 
     @Override
@@ -47,11 +47,11 @@ public class ItemServiceImpl implements ItemService {
         if (!userRepository.checkUser(userId)) {
             throw new NotFoundException("Такого пользователя не существует");
         }
-        Item item = itemDtoMapper.itemWriteDtoToItem(itemWriteDto, userId);
+        Item item = ItemDtoMapper.itemWriteDtoToItem(itemWriteDto, userId);
         if (!itemRepository.getItemById(itemId).getOwnerId().equals(userId)) {
             throw new ValidationException("Нарушение прав !");
         }
-        return itemDtoMapper.itemToItemReadDto(itemRepository.updateItem(item, itemId));
+        return ItemDtoMapper.itemToItemReadDto(itemRepository.updateItem(item, itemId));
     }
 
     @Override
@@ -60,24 +60,24 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Такого пользователя не существует");
         }
         return itemRepository.getAllItemsByUser(userId).stream()
-                .map(item -> itemDtoMapper.itemToItemReadDto(item))
+                .map(item -> ItemDtoMapper.itemToItemReadDto(item))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ItemReadDto> searchByText(String text) {
-        if ("".equals(text)) {
-            return new ArrayList<>();
+        if (text.isEmpty()) {
+            return Collections.emptyList();
         }
         return itemRepository.searchByText(text).stream()
-                .map(item -> itemDtoMapper.itemToItemReadDto(item))
+                .map(item -> ItemDtoMapper.itemToItemReadDto(item))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ItemReadDto> getAllItems() {
         return itemRepository.getAllItems().stream()
-                .map(item -> itemDtoMapper.itemToItemReadDto(item))
+                .map(item -> ItemDtoMapper.itemToItemReadDto(item))
                 .collect(Collectors.toList());
     }
 }

@@ -10,6 +10,8 @@ import ru.practicum.shareit.request.dto.ItemRequestWriteDto;
 @RequiredArgsConstructor
 public class ItemRequestController {
 
+    private static final String HEADERNAME = "X-Sharer-User-Id";
+
     private final RequestService requestService;
 
     @GetMapping("/{requestId}")
@@ -18,7 +20,7 @@ public class ItemRequestController {
     }
 
     @PostMapping
-    public ItemRequestReadDto saveItemRequest(@RequestHeader("X-Sharer-User-Id") Integer userId,
+    public ItemRequestReadDto saveItemRequest(@RequestHeader(HEADERNAME) Integer userId,
                                               @RequestBody ItemRequestWriteDto itemRequestWriteDto) {
         return requestService.saveRequest(itemRequestWriteDto, userId);
     }

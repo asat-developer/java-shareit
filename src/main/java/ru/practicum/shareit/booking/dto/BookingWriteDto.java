@@ -34,11 +34,6 @@ public class BookingWriteDto {
     @NotNull(groups = OnPatch.class, message = "Отсутствует статус для обновлении заказа !")
     private Status status;
 
-    /*@Null(groups = onPatch.class, message = "Идентификатор заказчика в заказе нельзя изменить при обновлении !")
-    @NotNull(groups = onPost.class, message = "Отсутствует идентификатор заказчика !")
-    @Positive(groups = {onPost.class, onPatch.class}, message = "Идентификатор заказчика должен быть больше 0 !")
-    private Integer booker;*/
-
     public interface OnPost {
     }
 

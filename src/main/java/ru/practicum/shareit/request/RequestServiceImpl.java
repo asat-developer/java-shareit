@@ -1,16 +1,13 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.request.dto.ItemRequestDtoMapper;
 import ru.practicum.shareit.request.dto.ItemRequestReadDto;
 import ru.practicum.shareit.request.dto.ItemRequestWriteDto;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.time.LocalDateTime;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
@@ -23,7 +20,7 @@ public class RequestServiceImpl implements RequestService {
         if (!requestRepository.checkRequest(requestId)) {
             throw new NotFoundException("Нет запроса с таким id");
         }
-        return itemRequestToItemRequestReadDto(requestRepository.getRequestById(requestId));
+        return ItemRequestDtoMapper.itemRequestToItemRequestReadDto(requestRepository.getRequestById(requestId));
     }
 
     @Override
@@ -31,21 +28,7 @@ public class RequestServiceImpl implements RequestService {
         if (!userRepository.checkUser(userId)) {
             throw new NotFoundException("Не существует пользователь, создавшего запрос !");
         }
-        return itemRequestToItemRequestReadDto(requestRepository
-                .saveRequest(itemRequestWriteDtoToItemRequest(itemRequestWriteDto, userId)));
-    }
-
-    private ItemRequestReadDto itemRequestToItemRequestReadDto(ItemRequest itemRequest) {
-        return new ItemRequestReadDto(itemRequest.getId(),
-                itemRequest.getDescription(),
-                itemRequest.getRequestorId(),
-                itemRequest.getTimeCreated());
-    }
-
-    private ItemRequest itemRequestWriteDtoToItemRequest(ItemRequestWriteDto itemRequestWriteDto, Integer userId) {
-        return new ItemRequest(null,
-                itemRequestWriteDto.getDescription(),
-                userId,
-                LocalDateTime.now());
+        return ItemRequestDtoMapper.itemRequestToItemRequestReadDto(requestRepository
+                .saveRequest(ItemRequestDtoMapper.itemRequestWriteDtoToItemRequest(itemRequestWriteDto, userId)));
     }
 }
