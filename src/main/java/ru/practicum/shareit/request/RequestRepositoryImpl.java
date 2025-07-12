@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+/*package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -34,4 +34,4 @@ public class RequestRepositoryImpl implements RequestRepository {
                 .max((o1, o2) -> Integer.compare(o1, o2))
                 .orElse(0) + 1;
     }
-}
+}*/

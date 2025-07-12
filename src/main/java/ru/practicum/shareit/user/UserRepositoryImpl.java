@@ -1,12 +1,11 @@
-package ru.practicum.shareit.user;
+/*package ru.practicum.shareit.user;
 
-import org.springframework.stereotype.Repository;
+//import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Repository
 public class UserRepositoryImpl implements UserRepository {
 
     private final Map<Integer, User> users = new HashMap<>();
@@ -57,4 +56,4 @@ public class UserRepositoryImpl implements UserRepository {
                 .max((o1, o2) -> Integer.compare(o1, o2))
                 .orElse(0) + 1;
     }
-}
+}*/

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+/*package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
@@ -74,4 +74,4 @@ public class ItemRepositoryImpl implements ItemRepository {
                 .max((o1, o2) -> Integer.compare(o1, o2))
                 .orElse(0) + 1;
     }
-}
+}*/

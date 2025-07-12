@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+/*package ru.practicum.shareit.booking;
 
 import org.springframework.stereotype.Repository;
 
@@ -48,4 +48,4 @@ public class BookingRepositoryImpl implements BookingRepository {
                 .max((o1, o2) -> Integer.compare(o1, o2))
                 .orElse(0) + 1;
     }
-}
+}*/
