@@ -3,6 +3,7 @@ package ru.practicum.shareit.exceptions;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,11 +23,13 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
     @ResponseBody
-    public ExceptionResponse handleValidationException(ValidationException exc) {
+    public ResponseEntity<ExceptionResponse> handleValidationException(ValidationException exc) {
         log.error("Ошибка при валидации: {}", exc.getMessage());
-        return new ExceptionResponse(exc.getMessage());
+
+        return ResponseEntity
+                .status(exc.getStatus())
+                .body(new ExceptionResponse(exc.getMessage()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -41,7 +44,13 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ExceptionResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exc) {
-        log.error("Некорректный ввод данных в запросе: {}", exc.getMessage());
-        return new ExceptionResponse(exc.getMessage());
+        String message = exc.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage())
+                .orElse("Ошибка валидации");
+        log.error("Некорректный ввод данных в запросе: {}", message);
+        return new ExceptionResponse(message);
     }
 }
