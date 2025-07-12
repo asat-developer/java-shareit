@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class BookingWriteDto {
 
-
     @Null(groups = OnPatch.class, message = "Время начала бронирования нельзя изменить при обновлении !")
     @NotNull(groups = OnPost.class, message = "Отсутствует время начала бронирования предмета !")
     @FutureOrPresent(groups = {OnPost.class, OnPatch.class}, message = "Недопустимое время !")
@@ -30,9 +29,6 @@ public class BookingWriteDto {
     @NotNull(groups = OnPost.class, message = "Отсутствует идентификатор бронируемого предмета !")
     @Positive(groups = {OnPost.class, OnPatch.class}, message = "Идентификатор предмета должен быть больше 0 !")
     private Integer itemId;
-
-    @NotNull(groups = OnPatch.class, message = "Отсутствует статус для обновлении заказа !")
-    private Status status;
 
     public interface OnPost {
     }

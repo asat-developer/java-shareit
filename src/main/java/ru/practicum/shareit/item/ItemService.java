@@ -1,12 +1,11 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.item.dto.ItemReadDto;
-import ru.practicum.shareit.item.dto.ItemWriteDto;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
 
 public interface ItemService {
-    ItemReadDto getItemById(Integer id);
+    ItemReadDtoWithBookingsAndComments getItemById(Integer id, Integer userId);
 
     ItemReadDto saveItem(ItemWriteDto itemWriteDto, Integer userId);
 
@@ -17,4 +16,6 @@ public interface ItemService {
     List<ItemReadDto> searchByText(String text);
 
     List<ItemReadDto> getAllItems();
+
+    CommentReadDto saveComment(CommentWriteDto commentWriteDto, Integer userId, Integer itemId);
 }
