@@ -3,8 +3,7 @@ package ru.practicum.shareit.item;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemReadDto;
-import ru.practicum.shareit.item.dto.ItemWriteDto;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
 
@@ -18,8 +17,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemReadDto getItemById(@PathVariable("itemId") Integer itemId) {
-        return itemService.getItemById(itemId);
+    public ItemReadDtoWithBookingsAndComments getItemById(@RequestHeader(HEADERNAME) Integer userId,
+                                                          @PathVariable("itemId") Integer itemId) {
+        return itemService.getItemById(itemId, userId);
     }
 
     @GetMapping("/all")
@@ -48,5 +48,12 @@ public class ItemController {
     @GetMapping("/search")
     public List<ItemReadDto> searchByText(@RequestParam(defaultValue = "") String text) {
         return itemService.searchByText(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentReadDto saveComment(@RequestHeader(HEADERNAME) Integer userId,
+                                   @RequestBody @Valid CommentWriteDto commentWriteDto,
+                                   @PathVariable("itemId") Integer itemId) {
+        return itemService.saveComment(commentWriteDto, userId, itemId);
     }
 }

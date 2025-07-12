@@ -7,6 +7,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDtoMapper;
 import ru.practicum.shareit.request.dto.ItemRequestReadDto;
 import ru.practicum.shareit.request.dto.ItemRequestWriteDto;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 @Service
 @RequiredArgsConstructor
@@ -17,18 +18,19 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ItemRequestReadDto getRequestById(Integer requestId) {
-        if (!requestRepository.checkRequest(requestId)) {
+        if (!requestRepository.existsById(requestId)) {
             throw new NotFoundException("Нет запроса с таким id");
         }
-        return ItemRequestDtoMapper.itemRequestToItemRequestReadDto(requestRepository.getRequestById(requestId));
+        return ItemRequestDtoMapper.itemRequestToItemRequestReadDto(requestRepository.findById(requestId).get());
     }
 
     @Override
     public ItemRequestReadDto saveRequest(ItemRequestWriteDto itemRequestWriteDto, Integer userId) {
-        if (!userRepository.checkUser(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Не существует пользователь, создавшего запрос !");
         }
-        return ItemRequestDtoMapper.itemRequestToItemRequestReadDto(requestRepository
-                .saveRequest(ItemRequestDtoMapper.itemRequestWriteDtoToItemRequest(itemRequestWriteDto, userId)));
+        User user = userRepository.findById(userId).get();
+        ItemRequest request = ItemRequestDtoMapper.itemRequestWriteDtoToItemRequest(itemRequestWriteDto, user);
+        return ItemRequestDtoMapper.itemRequestToItemRequestReadDto(requestRepository.save(request));
     }
 }
