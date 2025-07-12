@@ -8,11 +8,12 @@ import java.time.LocalDateTime;
 @Getter
 @RequiredArgsConstructor
 public class BookingReadDto {
-
     private final Integer id;
     private final LocalDateTime start;
     private final LocalDateTime end;
-    private final Integer itemId;
-    private final Integer bookerId;
+    private final ItemDtoForBooking item;
+    private final BookerDtoForBooking booker;
     private final Status status;
 }
+
+

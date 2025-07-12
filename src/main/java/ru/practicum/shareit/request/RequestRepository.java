@@ -1,9 +1,6 @@
 package ru.practicum.shareit.request;
 
-public interface RequestRepository {
-    ItemRequest getRequestById(Integer requestId);
+import org.springframework.data.jpa.repository.JpaRepository;
 
-    ItemRequest saveRequest(ItemRequest itemRequest);
-
-    Boolean checkRequest(Integer requestId);
+public interface RequestRepository extends JpaRepository<ItemRequest, Integer> {
 }

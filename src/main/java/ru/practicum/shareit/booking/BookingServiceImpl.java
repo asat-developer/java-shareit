@@ -1,7 +1,9 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDtoMapper;
 import ru.practicum.shareit.booking.dto.BookingReadDto;
 import ru.practicum.shareit.booking.dto.BookingWriteDto;
@@ -9,13 +11,18 @@ import ru.practicum.shareit.booking.dto.Status;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
@@ -23,51 +30,114 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
 
     @Override
-    public List<BookingReadDto> getBookingsByItemId(Integer itemId) {
-        if (!itemRepository.checkItem(itemId)) {
-            throw new NotFoundException("Нет предмета с таким id");
-        }
-
-        return bookingRepository.getBookingsByItemId(itemId).stream()
-                .map(booking -> BookingDtoMapper.bookingToBookingReadDto(booking))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public BookingReadDto saveBooking(BookingWriteDto bookingWriteDto, Integer bookerId) {
-        if (!itemRepository.checkItem(bookingWriteDto.getItemId())) {
-            throw new NotFoundException("Заказываемого предмета нет !");
+        Item item = itemRepository.findById(bookingWriteDto.getItemId()).orElseThrow(() ->
+                new NotFoundException("Нет запрашиваемого предмета !"));
+        if (!userRepository.existsById(bookerId)) {
+            throw new NotFoundException("Пользователя, который создает бронирование, нет !");
         }
-        if (!userRepository.checkUser(bookerId)) {
-            throw new NotFoundException("Пользователя, который запрашивает операцию нет !");
+        if (!item.getAvailable()) {
+           throw new ValidationException("Предмет недоступен для заказа !", HttpStatus.BAD_REQUEST);
         }
-         return BookingDtoMapper.bookingToBookingReadDto(bookingRepository
-                 .saveBooking(BookingDtoMapper.bookingWriteDtoToBooking(bookingWriteDto, bookerId, true)));
+        User booker = userRepository.findById(bookerId).get();
+        Booking booking = BookingDtoMapper.bookingWriteDtoToBooking(bookingWriteDto, booker, item);
+
+        bookingRepository.save(booking);
+        return BookingDtoMapper.bookingToBookingReadDto(booking);
     }
 
     @Override
-    public BookingReadDto updateBooking(BookingWriteDto bookingWriteDto, Integer bookingId, Integer userId) {
-        Booking booking = bookingRepository.getBookingById(bookingId);
-        if (!userRepository.checkUser(userId)) {
-            throw new NotFoundException("Пользователя, который запрашивает операцию нет !");
+    public BookingReadDto updateBooking(Integer userId, Integer bookingId, Boolean approvedStatus) {
+        if (!userRepository.existsById(userId)) {
+            throw new ValidationException("Пользователя, который запрашивает операцию, нет !", HttpStatus.BAD_REQUEST);
         }
-        if (bookingWriteDto.getStatus() == Status.UNKNOWN) {
-            throw new ValidationException("Задан неверный статус для обновления !");
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Нет такого заказа !"));
+        Item item = itemRepository.findById(booking.getItem().getId()).get();
+        if (!item.getOwner().getId().equals(userId)) {
+            throw new ValidationException("Нарушение прав !", HttpStatus.CONFLICT);
         }
-        if (booking.getBookerId().equals(userId) && bookingWriteDto.getStatus() == Status.CANCELLED) {
-            // Бронирование при обновлении создателем бронирования измениться может тольео на CANCELLED
-            booking.setStatus(Status.CANCELLED);
-            return BookingDtoMapper.bookingToBookingReadDto(bookingRepository.updateBookingByBooker(booking));
-        } else if (itemRepository.getItemById(booking.getItemId()).getOwnerId().equals(userId) // Изменение бронирование владельцем вещи
-                && (bookingWriteDto.getStatus() == Status.APPROVED ||
-                bookingWriteDto.getStatus() == Status.REJECTED)) {
-            booking.setStatus(bookingWriteDto.getStatus());
-            return BookingDtoMapper.bookingToBookingReadDto(bookingRepository.updateBookingByOwner(booking));
-        } else if (!booking.getBookerId().equals(userId) && !booking.getBookerId()
-                .equals(itemRepository.getItemById(booking.getItemId()).getOwnerId())) {
-            throw new ValidationException("Обращающийся пользователь не является владельцем предмета или заказчиком !");
+        if (approvedStatus) {
+            booking.setStatus(Status.APPROVED);
         } else {
-            throw new ValidationException("Пользователь пытается совершить неразрешенную для его статуса операцию !");
+            booking.setStatus(Status.REJECTED);
         }
+        bookingRepository.save(booking);
+        return BookingDtoMapper.bookingToBookingReadDto(booking);
+    }
+
+    @Override
+    public BookingReadDto getBookingByBookingId(Integer userId, Integer bookingId) {
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
+                new NotFoundException("Нет такого заказа !"));
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
+            throw new ValidationException("Нарушение прав !", HttpStatus.NOT_FOUND);
+        }
+        return BookingDtoMapper.bookingToBookingReadDto(booking);
+    }
+
+    @Override
+    public List<BookingReadDto> getBookingsByUser(Integer userId, State state) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("Пользователя, который запрашивает операцию, нет !");
+        }
+        if (state == State.ALL) {
+            return bookingRepository.findByBookerId(userId).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.CURRENT) {
+            return bookingRepository.findByBookerIdAndByStartAndEndBetween(userId).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.PAST) {
+            return bookingRepository.findByBookerIdAndEndBefore(userId, LocalDateTime.now()).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.FUTURE) {
+            return bookingRepository.findByBookerIdAndStartAfter(userId, LocalDateTime.now()).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.WAITING) {
+            return bookingRepository.findByBookerIdAndStatusIs(userId, Status.WAITING).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.REJECTED) {
+            return bookingRepository.findByBookerIdAndStatusIs(userId, Status.REJECTED).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<BookingReadDto> getBookingsByOwner(Integer userId, State state) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("Пользователя, который запрашивает операцию, нет !");
+        }
+        if (state == State.ALL) {
+            return bookingRepository.findByItemOwnerId(userId).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.CURRENT) {
+            return bookingRepository.findByOwnerIdAndByStartAndEndBetween(userId).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.PAST) {
+            return bookingRepository.findByItemOwnerIdAndStartAfter(userId, LocalDateTime.now()).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.FUTURE) {
+            return bookingRepository.findByItemOwnerIdAndEndBefore(userId, LocalDateTime.now()).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.WAITING) {
+            return bookingRepository.findByItemOwnerIdAndStatusIs(userId, Status.WAITING).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        } else if (state == State.REJECTED) {
+            return bookingRepository.findByItemOwnerIdAndStatusIs(userId, Status.REJECTED).stream()
+                    .map(entity -> BookingDtoMapper.bookingToBookingReadDto(entity))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
