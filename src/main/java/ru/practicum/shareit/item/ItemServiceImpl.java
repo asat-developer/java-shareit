@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -38,6 +35,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public ItemReadDtoWithBookingsAndComments getItemById(Integer id, Integer userId) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException("Предмета с таким id нет"));
         List<CommentReadDto> comments = commentRepository.findByItemId(id).stream()
@@ -67,9 +65,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemReadDto saveItem(ItemWriteDto itemWriteDto, Integer userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Такого пользователя не существует");
-        }
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Такого пользователя не существует"));
         ItemRequest request;
         if (itemWriteDto.getOwnerId() == null) {
             request = null;
@@ -77,7 +74,6 @@ public class ItemServiceImpl implements ItemService {
             request = requestRepository.findById(itemWriteDto.getRequestId()).orElseThrow(() ->
                     new NotFoundException("Такого запроса не существует"));
         }
-        User user = userRepository.findById(userId).get();
         Item item = ItemDtoMapper.itemWriteDtoToItem(itemWriteDto, user, request);
         itemRepository.save(item);
         return ItemDtoMapper.itemToItemReadDto(item);
@@ -88,14 +84,11 @@ public class ItemServiceImpl implements ItemService {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Такого пользователя не существует");
         }
-        if (!itemRepository.existsById(itemId)) {
-            throw new NotFoundException("Такого предмента не существует");
-        }
-        if (!itemRepository.findById(itemId).get().getOwner().getId().equals(userId)) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("Такого предмента не существует"));
+        if (!item.getOwner().getId().equals(userId)) {
             throw new ValidationException("Нарушение прав !", HttpStatus.CONFLICT);
         }
-
-        Item item = itemRepository.findById(itemId).get();
         if (itemWriteDto.getName() != null) {
             item.setName(itemWriteDto.getName());
         }
@@ -105,16 +98,11 @@ public class ItemServiceImpl implements ItemService {
         if (itemWriteDto.getAvailable() != null) {
             item.setAvailable(itemWriteDto.getAvailable());
         }
-        if (itemWriteDto.getRequestId() != null) {
-            ItemRequest request = requestRepository.findById(itemWriteDto.getRequestId()).orElseThrow(() ->
-                    new NotFoundException("Такого запроса не существует"));
-            item.setRequest(request);
-        }
-        itemRepository.save(item);
         return ItemDtoMapper.itemToItemReadDto(item);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemReadDto> getAllItemsByUser(Integer userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Такого пользователя не существует");
@@ -125,6 +113,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemReadDto> searchByText(String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
@@ -136,6 +125,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemReadDto> getAllItems() {
         return itemRepository.findAll().stream()
                 .map(item -> ItemDtoMapper.itemToItemReadDto(item))
@@ -144,14 +134,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentReadDto saveComment(CommentWriteDto commentWriteDto, Integer userId, Integer itemId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("Такого пользователя не существует");
-        }
-        if (!itemRepository.existsById(itemId)) {
-            throw new NotFoundException("Такой вещи не существует");
-        }
-        User user = userRepository.findById(userId).get();
-        Item item = itemRepository.findById(itemId).get();
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Такого пользователя не существует"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException("Такой вещи не существует"));
         if (!bookingRepository.existsByBookerIdAndItemIdAndEndBefore(userId, itemId, LocalDateTime.now())) {
             throw new ValidationException("Пользователь не брал в аренду эту вещь, либо бронирование ещё не завершилось !",
                     HttpStatus.BAD_REQUEST);

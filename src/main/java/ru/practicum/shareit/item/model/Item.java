@@ -1,12 +1,13 @@
 package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-@Data
+@Getter
 @Entity
 @Table(name = "items")
 @NoArgsConstructor
@@ -16,10 +17,13 @@ public class Item {
     @Column(name = "item_id")
     private Integer id;
 
+    @Setter
     private String name;
 
+    @Setter
     private String description;
 
+    @Setter
     private Boolean available;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,4 +33,9 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private ItemRequest request;
+
+    public Item (User user, ItemRequest request) {
+        this.owner = user;
+        this.request = request;
+    }
 }

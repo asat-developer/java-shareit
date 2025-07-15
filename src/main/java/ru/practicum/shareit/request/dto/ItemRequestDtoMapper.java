@@ -14,10 +14,8 @@ public class ItemRequestDtoMapper {
     }
 
     public static ItemRequest itemRequestWriteDtoToItemRequest(ItemRequestWriteDto itemRequestWriteDto, User user) {
-        ItemRequest request = new ItemRequest();
+        ItemRequest request = new ItemRequest(user, LocalDateTime.now());
         request.setDescription(itemRequestWriteDto.getDescription());
-        request.setRequestor(user);
-        request.setTimeCreated(LocalDateTime.now());
         return request;
     }
 }

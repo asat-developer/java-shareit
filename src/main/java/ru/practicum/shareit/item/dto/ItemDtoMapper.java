@@ -11,12 +11,10 @@ import java.util.List;
 
 public class ItemDtoMapper {
     public static Item itemWriteDtoToItem(ItemWriteDto itemWriteDto, User user, ItemRequest request) {
-        Item item = new Item();
+        Item item = new Item(user, request);
         item.setName(itemWriteDto.getName());
         item.setDescription(itemWriteDto.getDescription());
         item.setAvailable(itemWriteDto.getAvailable());
-        item.setOwner(user);
-        item.setRequest(request);
         return item;
     }
 
@@ -37,11 +35,8 @@ public class ItemDtoMapper {
     }
 
     public static Comment commentWriteDtoToComment(CommentWriteDto commentWriteDto, User author, Item item) {
-        Comment comment = new Comment();
+        Comment comment = new Comment(item, author, LocalDateTime.now());
         comment.setText(commentWriteDto.getText());
-        comment.setItem(item);
-        comment.setAuthor(author);
-        comment.setCreated(LocalDateTime.now());
         return comment;
     }
 

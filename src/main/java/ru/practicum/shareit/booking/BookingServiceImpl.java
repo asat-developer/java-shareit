@@ -33,13 +33,12 @@ public class BookingServiceImpl implements BookingService {
     public BookingReadDto saveBooking(BookingWriteDto bookingWriteDto, Integer bookerId) {
         Item item = itemRepository.findById(bookingWriteDto.getItemId()).orElseThrow(() ->
                 new NotFoundException("Нет запрашиваемого предмета !"));
-        if (!userRepository.existsById(bookerId)) {
-            throw new NotFoundException("Пользователя, который создает бронирование, нет !");
-        }
+
+        User booker = userRepository.findById(bookerId).orElseThrow(() ->
+                new NotFoundException("Пользователя, который создает бронирование, нет !"));
         if (!item.getAvailable()) {
            throw new ValidationException("Предмет недоступен для заказа !", HttpStatus.BAD_REQUEST);
         }
-        User booker = userRepository.findById(bookerId).get();
         Booking booking = BookingDtoMapper.bookingWriteDtoToBooking(bookingWriteDto, booker, item);
 
         bookingRepository.save(booking);
@@ -51,7 +50,8 @@ public class BookingServiceImpl implements BookingService {
         if (!userRepository.existsById(userId)) {
             throw new ValidationException("Пользователя, который запрашивает операцию, нет !", HttpStatus.BAD_REQUEST);
         }
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Нет такого заказа !"));
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
+                new NotFoundException("Нет такого заказа !"));
         Item item = itemRepository.findById(booking.getItem().getId()).get();
         if (!item.getOwner().getId().equals(userId)) {
             throw new ValidationException("Нарушение прав !", HttpStatus.CONFLICT);
@@ -61,11 +61,11 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booking.setStatus(Status.REJECTED);
         }
-        bookingRepository.save(booking);
         return BookingDtoMapper.bookingToBookingReadDto(booking);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookingReadDto getBookingByBookingId(Integer userId, Integer bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
                 new NotFoundException("Нет такого заказа !"));
@@ -76,6 +76,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingReadDto> getBookingsByUser(Integer userId, State state) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователя, который запрашивает операцию, нет !");
@@ -109,6 +110,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingReadDto> getBookingsByOwner(Integer userId, State state) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("Пользователя, который запрашивает операцию, нет !");

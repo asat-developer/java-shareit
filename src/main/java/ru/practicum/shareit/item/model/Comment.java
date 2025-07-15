@@ -1,13 +1,14 @@
 package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
 @Entity
 @Table(name = "comments")
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class Comment {
     @Column(name = "comment_id")
     private Integer id;
 
+    @Setter
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,4 +31,10 @@ public class Comment {
 
     @Column(name = "time_created")
     private LocalDateTime created;
+
+    public Comment (Item item, User user, LocalDateTime created) {
+        this.item = item;
+        this.author = user;
+        this.created = created;
+    }
 }

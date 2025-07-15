@@ -15,11 +15,9 @@ public class BookingDtoMapper {
     }
 
     public static Booking bookingWriteDtoToBooking(BookingWriteDto bookingWriteDto, User booker, Item item) {
-        Booking booking = new Booking();
+        Booking booking = new Booking(item, booker);
         booking.setStart(bookingWriteDto.getStart());
         booking.setEnd(bookingWriteDto.getEnd());
-        booking.setBooker(booker);
-        booking.setItem(item);
         booking.setStatus(Status.WAITING);
         return booking;
     }
