@@ -32,7 +32,7 @@ public class Comment {
     @Column(name = "time_created")
     private LocalDateTime created;
 
-    public Comment (Item item, User user, LocalDateTime created) {
+    public Comment(Item item, User user, LocalDateTime created) {
         this.item = item;
         this.author = user;
         this.created = created;

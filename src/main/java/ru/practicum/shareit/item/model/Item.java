@@ -34,7 +34,7 @@ public class Item {
     @JoinColumn(name = "request_id")
     private ItemRequest request;
 
-    public Item (User user, ItemRequest request) {
+    public Item(User user, ItemRequest request) {
         this.owner = user;
         this.request = request;
     }
