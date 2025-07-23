@@ -8,6 +8,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import ru.practicum.shareit.booking.State;
@@ -28,6 +29,10 @@ public class BookingClient extends BaseClient {
         );
     }
 
+    public BookingClient(RestTemplate restTemplate) {
+        super(restTemplate);
+    }
+
     public ResponseEntity<Object> saveBooking(long userId, BookingWriteDto bookingWriteDto) {
         return post("", userId, bookingWriteDto);
     }
@@ -38,7 +43,7 @@ public class BookingClient extends BaseClient {
     }
 
 
-    public ResponseEntity<Object> getBookingByBookingId(long userId, Integer bookingId) {
+    public ResponseEntity<Object> getBookingByBookingId(long userId, long bookingId) {
         return get("/" + bookingId, userId);
     }
 

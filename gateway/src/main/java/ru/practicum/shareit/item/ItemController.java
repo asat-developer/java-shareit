@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.request.ItemClient;
+import ru.practicum.shareit.item.ItemClient;
 
 @RestController
 @RequestMapping("/items")

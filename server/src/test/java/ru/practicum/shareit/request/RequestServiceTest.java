@@ -58,7 +58,7 @@ class RequestServiceTest {
         assertEquals(1, result.getId());
         assertEquals("Need hammer", result.getDescription());
         assertEquals(1, result.getRequestorId());
-        verify(requestRepository).save(any(ItemRequest.class));
+        Mockito.verify(requestRepository).save(any(ItemRequest.class));
     }
 
     @Test

@@ -223,7 +223,7 @@ class ItemServiceTest {
         item2.setDescription("Desc2");
         item2.setAvailable(false);
 
-        when(itemRepository.findByOwnerId(1)).thenReturn(List.of(item1, item2));
+        Mockito.when(itemRepository.findByOwnerId(1)).thenReturn(List.of(item1, item2));
 
         List<ItemReadDto> dtos = itemService.getAllItemsByUser(1);
 

@@ -60,7 +60,7 @@ class ItemRequestControllerTest {
 
     @Test
     void getRequestsByUserId_shouldReturnList() throws Exception {
-        when(requestService.getRequestsByUserId(1)).thenReturn(List.of(requestReadDtoWithItems));
+        Mockito.when(requestService.getRequestsByUserId(1)).thenReturn(List.of(requestReadDtoWithItems));
 
         mockMvc.perform(get("/requests")
                         .header("X-Sharer-User-Id", 1))
@@ -71,7 +71,7 @@ class ItemRequestControllerTest {
 
     @Test
     void getAllRequests_shouldReturnList() throws Exception {
-        when(requestService.findAllRequests()).thenReturn(List.of(requestReadDto));
+        Mockito.when(requestService.findAllRequests()).thenReturn(List.of(requestReadDto));
 
         mockMvc.perform(get("/requests/all"))
                 .andExpect(status().isOk())
@@ -81,7 +81,7 @@ class ItemRequestControllerTest {
 
     @Test
     void getRequestById_shouldReturnDto() throws Exception {
-        when(requestService.getRequestById(1)).thenReturn(requestReadDtoWithItems);
+        Mockito.when(requestService.getRequestById(1)).thenReturn(requestReadDtoWithItems);
 
         mockMvc.perform(get("/requests/1"))
                 .andExpect(status().isOk())

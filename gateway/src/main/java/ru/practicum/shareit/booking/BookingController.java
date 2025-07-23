@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -9,6 +10,7 @@ import ru.practicum.shareit.booking.dto.BookingWriteDto;
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
+@Validated
 public class BookingController {
 
     private static final String HEADERNAME = "X-Sharer-User-Id";
@@ -23,14 +25,14 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> updateBooking(@RequestHeader(HEADERNAME) Integer userId,
-                                        @PathVariable("bookingId") Integer bookingId,
+                                        @PathVariable("bookingId") @Positive Integer bookingId,
                                         @RequestParam("approved") Boolean approvedStatus) {
         return bookingClient.updateBooking(userId, bookingId, approvedStatus);
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object> getBookingByBookingId(@RequestHeader(HEADERNAME) Integer userId,
-                                                 @PathVariable("bookingId") Integer bookingId) {
+    public ResponseEntity<Object> getBookingByBookingId(@RequestHeader(HEADERNAME) Long userId,
+                                                 @PathVariable("bookingId") @Positive Long bookingId) {
         return bookingClient.getBookingByBookingId(userId, bookingId);
     }
 

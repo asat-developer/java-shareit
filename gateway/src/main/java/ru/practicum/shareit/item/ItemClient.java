@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -6,6 +6,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import ru.practicum.shareit.client.BaseClient;
@@ -28,6 +29,10 @@ public class ItemClient extends BaseClient {
         );
     }
 
+    public ItemClient(RestTemplate restTemplate) {
+        super(restTemplate);
+    }
+
     public ResponseEntity<Object> getItemById(long userId, long itemId) {
         return get("/" + itemId, userId);
     }
@@ -37,7 +42,7 @@ public class ItemClient extends BaseClient {
         return get("/all");
     }
 
-    public ResponseEntity<Object> saveItem(int userId, ItemWriteDto itemWriteDto) {
+    public ResponseEntity<Object> saveItem(long userId, ItemWriteDto itemWriteDto) {
         return post("", userId, itemWriteDto);
     }
 

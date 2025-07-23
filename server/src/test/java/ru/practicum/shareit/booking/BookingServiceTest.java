@@ -67,7 +67,7 @@ class BookingServiceTest {
 
         assertNotNull(result);
         assertEquals(result.getItem().getId(), 1);
-        verify(bookingRepository, times(1)).save(any(Booking.class));
+        Mockito.verify(bookingRepository, times(1)).save(any(Booking.class));
     }
 
     @Test
@@ -95,8 +95,8 @@ class BookingServiceTest {
                 1
         );
 
-        when(itemRepository.findById(1)).thenReturn(Optional.of(item));
-        when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        Mockito.when(itemRepository.findById(1)).thenReturn(Optional.of(item));
+        Mockito.when(userRepository.findById(1)).thenReturn(Optional.of(user));
 
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> bookingsService.saveBooking(writeDto, 1));
@@ -109,9 +109,9 @@ class BookingServiceTest {
         Booking booking = new Booking(item, user);
         booking.setStatus(Status.WAITING);
 
-        when(userRepository.existsById(1)).thenReturn(true);
-        when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
-        when(itemRepository.findById(1)).thenReturn(Optional.of(item));
+        Mockito.when(userRepository.existsById(1)).thenReturn(true);
+        Mockito.when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
+        Mockito.when(itemRepository.findById(1)).thenReturn(Optional.of(item));
 
         BookingReadDto result = bookingsService.updateBooking(1, 1, true);
 
@@ -126,9 +126,9 @@ class BookingServiceTest {
         ReflectionTestUtils.setField(item, "owner", otherUser);
         Booking booking = new Booking(item, user);
 
-        when(userRepository.existsById(1)).thenReturn(true);
-        when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
-        when(itemRepository.findById(1)).thenReturn(Optional.of(item));
+        Mockito.when(userRepository.existsById(1)).thenReturn(true);
+        Mockito.when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
+        Mockito.when(itemRepository.findById(1)).thenReturn(Optional.of(item));
 
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> bookingsService.updateBooking(1, 1, true));
@@ -140,7 +140,7 @@ class BookingServiceTest {
     void getBookingByBookingId_shouldReturnDto() {
         Booking booking = new Booking(item, user);
 
-        when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
+        Mockito.when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
 
         BookingReadDto result = bookingsService.getBookingByBookingId(1, 1);
 
@@ -157,7 +157,7 @@ class BookingServiceTest {
 
         Booking booking = new Booking(item, user);
 
-        when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
+        Mockito.when(bookingRepository.findById(1)).thenReturn(Optional.of(booking));
 
         ValidationException exception = assertThrows(ValidationException.class,
                 () -> bookingsService.getBookingByBookingId(42, 1));
