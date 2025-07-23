@@ -15,13 +15,13 @@ public class BookingWriteDto {
 
     @Null(groups = OnPatch.class, message = "Время начала бронирования нельзя изменить при обновлении !")
     @NotNull(groups = OnPost.class, message = "Отсутствует время начала бронирования предмета !")
-    @FutureOrPresent(groups = {OnPost.class, OnPatch.class}, message = "Недопустимое время !")
+    //@FutureOrPresent(groups = {OnPost.class, OnPatch.class}, message = "Недопустимое время !")
     private LocalDateTime start;
 
 
     @Null(groups = OnPatch.class, message = "Время конца бронирования нельзя изменить при обновлении !")
     @NotNull(groups = OnPost.class, message = "Отсутствует время конца бронирования предмета !")
-    @FutureOrPresent(groups = {OnPost.class, OnPatch.class}, message = "Недопустимое время !")
+    //@FutureOrPresent(groups = {OnPost.class, OnPatch.class}, message = "Недопустимое время !")
     private LocalDateTime end;
 
 
