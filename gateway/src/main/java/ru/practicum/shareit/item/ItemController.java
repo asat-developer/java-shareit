@@ -1,15 +1,19 @@
 package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.ItemClient;
 
-@RestController
+@Controller
 @RequestMapping("/items")
 @RequiredArgsConstructor
+@Validated
 public class ItemController {
 
     private static final String HEADERNAME = "X-Sharer-User-Id";
@@ -17,8 +21,8 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<Object> getItemById(@RequestHeader(HEADERNAME) Integer userId,
-                                                          @PathVariable("itemId") Integer itemId) {
+    public ResponseEntity<Object> getItemById(@RequestHeader(HEADERNAME) @Positive @NotNull Integer userId,
+                                                          @PathVariable("itemId") @Positive @NotNull Integer itemId) {
         return itemClient.getItemById(userId, itemId);
     }
 
@@ -28,20 +32,20 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> saveItem(@RequestHeader(HEADERNAME) Integer userId,
+    public ResponseEntity<Object> saveItem(@RequestHeader(HEADERNAME) @Positive @NotNull Integer userId,
                                 @RequestBody @Valid ItemWriteDto itemWriteDto) {
         return itemClient.saveItem(userId, itemWriteDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItem(@RequestHeader(HEADERNAME) Integer userId,
-                                  @RequestBody ItemWriteDto itemWriteDto,
-                                  @PathVariable("itemId") Integer itemId) {
+    public ResponseEntity<Object> updateItem(@RequestHeader(HEADERNAME) @Positive @NotNull Integer userId,
+                                  @RequestBody @Valid ItemWriteDto itemWriteDto,
+                                  @PathVariable("itemId") @Positive @NotNull Integer itemId) {
         return itemClient.updateItem(userId, itemId, itemWriteDto);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllItemsByUser(@RequestHeader(HEADERNAME) Integer userId) {
+    public ResponseEntity<Object> getAllItemsByUser(@RequestHeader(HEADERNAME) @Positive @NotNull Integer userId) {
         return itemClient.getAllItemsByUser(userId);
     }
 
@@ -51,9 +55,9 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> saveComment(@RequestHeader(HEADERNAME) Integer userId,
+    public ResponseEntity<Object> saveComment(@RequestHeader(HEADERNAME) @Positive @NotNull Integer userId,
                                       @RequestBody @Valid CommentWriteDto commentWriteDto,
-                                      @PathVariable("itemId") Integer itemId) {
+                                      @PathVariable("itemId") @Positive @NotNull Integer itemId) {
         return itemClient.saveComment(userId, itemId, commentWriteDto);
     }
 }

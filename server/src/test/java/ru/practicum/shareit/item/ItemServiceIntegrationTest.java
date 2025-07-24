@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ItemServiceIntegrationTest {
 
@@ -64,7 +64,7 @@ class ItemServiceIntegrationTest {
         User savedUser1 = userRepository.save(user1);
         User savedUser2 = userRepository.save(user2);
 
-        Item item = new Item(user1, null);
+        Item item = new Item(savedUser1, null);
         item.setAvailable(true);
         item.setDescription("Wooden");
         item.setName("Table");
@@ -72,18 +72,20 @@ class ItemServiceIntegrationTest {
         Item savedItem = itemRepository.save(item);
 
         Booking booking = new Booking(savedItem, savedUser2);
-        booking.setStart(LocalDateTime.now().minusDays(2));
-        booking.setEnd(LocalDateTime.now().minusDays(1));
+        LocalDateTime fixedNow = LocalDateTime.of(2025, 7, 24, 12, 0);
+        booking.setStart(fixedNow.minusDays(2));
+        booking.setEnd(fixedNow.minusDays(1));
         booking.setStatus(Status.WAITING);
+        bookingRepository.save(booking);
 
         Comment comment = new Comment(item, savedUser2, LocalDateTime.now());
         comment.setText("Best Thing !");
 
-        Comment savedComment = commentRepository.save(comment);
+        commentRepository.save(comment);
 
-        ItemReadDtoWithBookingsAndComments result = itemService.getItemById(1, 1);
+        ItemReadDtoWithBookingsAndComments result = itemService.getItemById(savedItem.getId(), savedUser1.getId());
         assertNotNull(result);
-        assertEquals(result.getComments().size(), 1);
+        assertEquals(1, result.getComments().size());
     }
 }
 

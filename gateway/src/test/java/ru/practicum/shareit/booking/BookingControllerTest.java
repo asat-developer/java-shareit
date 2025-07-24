@@ -120,5 +120,23 @@ class BookingControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Передаваемые параметры должны быть больше 0"));
     }
+
+    @Test
+    void updateBooking_ShouldReturnBadRequest_WhenApprovedIsInvalid() throws Exception {
+        mockMvc.perform(patch("/bookings/10")
+                        .header(HEADER_NAME, 1)
+                        .param("approved", "notBoolean"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Параметр 'approved' должен быть типа Boolean"));
+    }
+
+    @Test
+    void getBookingsByUser_ShouldReturnBadRequest_WhenStateIsInvalid() throws Exception {
+        mockMvc.perform(get("/bookings")
+                        .header(HEADER_NAME, 1)
+                        .param("state", "invalidState"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Некорректный формат state: invalidState"));
+    }
 }
 
